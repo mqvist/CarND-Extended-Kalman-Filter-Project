@@ -38,4 +38,31 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   TODO:
     * Calculate a Jacobian here.
   */
+  MatrixXd Hj(3, 4);
+
+  float px = x_state[0];
+  float py = x_state[1];
+  float vx = x_state[2];
+  float vy = x_state[3];
+  float c1 = px * px + py * py;
+  float c2 = sqrt(c1);
+  float c3 = c1 * c2;
+
+  if (c1 == 0) {
+    std::cout << "CalculateJacobian: px and py are both zero" << std::endl;
+    return Hj;
+  }
+
+  Hj << px / c2, py / c2, 0, 0,
+        -py / c1, px / c1, 0, 0,
+        py * (vx * py - vy * px) / c3, px * (px * vy - py * vx) / c3, px / c2, py / c2;
+  return Hj;
 }
+
+Eigen::Vector4d Tools::Radar2State(const Eigen::Vector3d &radar_measurement) {
+  float range = radar_measurement[0];
+  float angle = radar_measurement[1];
+  float range_rate = radar_measurement[2];
+  return Eigen::Vector4d(range * cos(angle), range * sin(angle), range_rate * cos(angle), range_rate * sin(angle));
+}
+
